@@ -6,6 +6,7 @@ int globvar = 6;
 char buf[] = "a write to stdout\n";
 
 int main() {
+    signal(SIGCHLD, SIG_IGN);   /// prevent spawn zombie process
     int var{88};
     pid_t pid;
     if (write(STDOUT_FILENO, buf, sizeof(buf)-1) != sizeof(buf)-1){
@@ -22,7 +23,7 @@ int main() {
         ++var;
     }
     else{
-        sleep(2);
+        sleep(20);
     }
     printf("pid=%ld, glob=%d, var=%d, child pid=%d\n", (long)getpid(), globvar, var, pid);
     return 0;
