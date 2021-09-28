@@ -12,7 +12,8 @@ int main() {
         err_sys("write error");
     }
     std::cout << "before fork\n";
-
+    //std::cout << std::flush;
+    // if don't flush, before fork will be written twice when redirect
     if ((pid = fork()) < 0){
         err_sys("fork error");
     }
