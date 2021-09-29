@@ -40,7 +40,7 @@ WAIT_PARENT(void)
 	sigflag = 0;
 
 	/* Reset signal mask to original value */
-	if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+	if (sigprocmask(SIG_SETMASK, &oldmask, nullptr) < 0)
 		err_sys("SIG_SETMASK error");
 }
 
@@ -58,6 +58,6 @@ WAIT_CHILD(void)
 	sigflag = 0;
 
 	/* Reset signal mask to original value */
-	if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0)
+	if (sigprocmask(SIG_SETMASK, &oldmask, nullptr) < 0)
 		err_sys("SIG_SETMASK error");
 }
