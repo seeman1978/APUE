@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(race_cond)
+include_directories(../include)
+set(CMAKE_CXX_STANDARD 14)
+aux_source_directory(../lib src)
+add_executable(race_cond main.cpp ${src})
