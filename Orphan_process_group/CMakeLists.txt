@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(Orphan_process_group)
+include_directories(../include)
+set(CMAKE_CXX_STANDARD 20)
+aux_source_directory(../lib src)
+add_executable(Orphan_process_group main.cpp ${src})
