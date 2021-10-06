@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("signal2")
 include_directories(../include)
+set(CMAKE_CXX_STANDARD 17)
 aux_source_directory(../lib src)
 # 将源代码添加到此项目的可执行文件。
 add_executable (signal2 "signal2.cpp" ${src})

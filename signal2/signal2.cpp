@@ -3,6 +3,8 @@
 
 #include  "apue.h"
 #include <iostream>
+#include <pwd.h>
+
 using namespace std;
 
 void my_alarm(int signo)
@@ -22,10 +24,10 @@ int main()
 	signal(SIGALRM, my_alarm);
 	alarm(1);
 	for (;;) {
-		if (ptr = getpwnam("sar"); ptr == nullptr) {
+		if (ptr = getpwnam("wq"); ptr == nullptr) {
 			err_sys("getpwnam error");
 		}
-		if (strcmp(ptr->pw_name, "sar") != 0) {
+		if (strcmp(ptr->pw_name, "wq") != 0) {
 			cout << "return value corrupted!, pw_name =" << ptr->pw_name << "\n";
 		}
 	}
