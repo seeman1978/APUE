@@ -7,6 +7,6 @@ project ("signal")
 include_directories(../include)
 aux_source_directory(../lib src)
 # 将源代码添加到此项目的可执行文件。
-add_executable (signal "signal.cpp" "signal.h" ${src})
+add_executable (signal "signal.cpp" ${src})
 
 # TODO: 如有需要，请添加测试并安装目标。

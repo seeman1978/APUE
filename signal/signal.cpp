@@ -1,7 +1,7 @@
 ﻿// signal.cpp: 定义应用程序的入口点。
 //
 
-#include "signal.h"
+#include <iostream>
 #include "apue.h"
 using namespace std;
 
@@ -23,7 +23,7 @@ void sig_usr(int signo)
 
 int main()
 {
-	if (signal(SIGUSER1, sig_usr) == SIG_ERR)
+	if (signal(SIGUSR1, sig_usr) == SIG_ERR)
 	{
 		err_sys("can't catch SIGUSR1");
 	}
@@ -35,4 +35,5 @@ int main()
 	{
 		pause();
 	}
+    return 0;
 }
