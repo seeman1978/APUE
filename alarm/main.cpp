@@ -2,7 +2,7 @@
 #include <csignal>
 #include <unistd.h>
 #include <csetjmp>
-
+#include "apue.h"
 void sig_alrm1(int signo){
     /// noting to do, just return to wake up the pause
 }
@@ -34,7 +34,23 @@ unsigned int sleep2(unsigned int seconds){
     return alarm(0);/// turn off timer, return unslept time
 }
 
+void sig_int(int signo){
+    volatile int k{0};
+    std::cout << "\nsig_int starting\n";
+    for (int i = 0; i < 300000; ++i) {
+        for (int j = 0; j < 400000; ++j) {
+            k += i*j;
+        }
+    }
+    std::cout << "sig_int finished\n";
+}
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    unsigned int unslept;
+    if (signal(SIGINT, sig_int) == SIG_ERR){
+        err_sys("signal (SIGINaT) error");
+    }
+    unslept = sleep2(5);
+    std::cout << "sleep2 returned : " << unslept << '\n';
     return 0;
 }
