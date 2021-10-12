@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(recursive_mutex)
+include_directories(../include)
+set(CMAKE_CXX_STANDARD 17)
+aux_source_directory(../lib src)
+add_executable(recursive_mutex main.cpp ${src} ../threadclt/detach.cpp)
+target_link_libraries(recursive_mutex pthread)
