@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <sys/time.h>
+#include <climits>
 #include "apue.h"
 constexpr auto NTHR = 8;    ///number of threads
 constexpr auto NUMNUM = 8000000L;   ///number of numbers to sort
@@ -10,11 +11,6 @@ long nums[NUMNUM];
 long snums[NUMNUM];
 pthread_barrier_t b;
 
-#ifdef SOLARIS
-#define heapsort qsort
-#else
-extern int heapsort(void*, size_t, size_t, int(*)(const void*, const void *));
-#endif
 int complong(const void *arg1, const void *arg2){
     long l1 = *(long*)arg1;
     long l2 = *(long*)arg2;
@@ -31,7 +27,7 @@ int complong(const void *arg1, const void *arg2){
 
 void *thr_fn(void *arg){
     long idx = (long)arg;
-    heapsort(&nums[idx], TNUM, sizeof(long), complong);
+    qsort(&nums[idx], TNUM, sizeof(long), complong);
     pthread_barrier_wait(&b);
     return nullptr;
 }
@@ -81,8 +77,8 @@ int main() {
     endusec = end.tv_sec* 1000000+ end.tv_usec;
     elapsed = (double)(endusec - startusec)/1000000.0;
     printf("sort took %.4f seconds\n", elapsed);
-    for ( i = 0; i < NUMNUM; ++i) {
-        printf("%ld\n", snums[i]);
-    }
+//    for ( i = 0; i < NUMNUM; ++i) {
+//        printf("%ld\n", snums[i]);
+//    }
     return 0;
 }
