@@ -5,4 +5,4 @@ include_directories(../include)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(filetype main.cpp ../lib/error.cpp)
+add_executable(filetype main.cpp)
