@@ -1,6 +1,5 @@
 #include <iostream>
 #include "apue.h"
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -93,7 +92,7 @@ void print_flags(struct addrinfo *aip){
 }
 
 int main(int argc, char** argv) {
-    struct addrinfo *ailist, *aip, hint;
+    struct addrinfo *ailist{nullptr}, *aip{nullptr}, hint{};
     struct sockaddr_in *sinp;
     const char *addr;
     int err;
@@ -121,7 +120,7 @@ int main(int argc, char** argv) {
         if (aip->ai_family == AF_INET){
             sinp = reinterpret_cast<sockaddr_in *>(aip->ai_addr);
             addr = inet_ntop(AF_INET, &sinp->sin_addr, abuf, INET_ADDRSTRLEN);
-            std::cout << " address %s" << (addr ? addr : "unknown");
+            std::cout << " address " << (addr ? addr : "unknown");
             std::cout << " port " << ntohs(sinp->sin_port);
         }
         std::cout << '\n';
