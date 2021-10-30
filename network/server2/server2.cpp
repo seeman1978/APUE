@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <netdb.h>
 using namespace std;
 constexpr auto QLEN = 10;
 
@@ -12,7 +13,7 @@ constexpr auto QLEN = 10;
 #define HOST_NAME_MAX 256
 #endif
 
-extern int intiserver(int, const struct sockaddr*, socklen_t, int);
+extern int initserver(int, const struct sockaddr*, socklen_t, int);
 
 void serve(int sockfd) {
 	int clfd, status;
@@ -35,11 +36,11 @@ void serve(int sockfd) {
 			}
 			close(clfd);
 			execl("/usr/bin/uptime", "uptime", (char*)nullptr);
-			syslog(LOG_ERR, "ruptimed: unexpected return from exec: %s", strerror(errono));
+			syslog(LOG_ERR, "ruptimed: unexpected return from exec: %s", strerror(errno));
 		}
 		else { /// parent
 			close(clfd);
-			waipid(pid, &status, 0);
+			waitpid(pid, &status, 0);
 		}
 	}
 }
@@ -48,7 +49,8 @@ int main(int argc, char** argv)
 {
 	struct addrinfo* ailist, * aip;
 	struct addrinfo hint;
-	int sockfd, err, n;
+	int sockfd, err;
+    size_t n;
 	char* host;
 	if (argc != 1) {
 		err_quit("usage: ruptimed");
@@ -56,7 +58,7 @@ int main(int argc, char** argv)
 	if (n = sysconf(_SC_HOST_NAME_MAX); n < 0) {
 		n = HOST_NAME_MAX;
 	}
-	if (host = malloc(n) == nullptr) {
+	if (host = static_cast<char *>(malloc(n)); host == nullptr) {
 		err_sys("malloc error");
 	}
 	if (gethostname(host, n) < 0) {
