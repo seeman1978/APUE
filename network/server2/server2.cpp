@@ -46,6 +46,38 @@ void serve(int sockfd) {
 
 int main(int argc, char** argv)
 {
-	struct addrinfo 
+	struct addrinfo* ailist, * aip;
+	struct addrinfo hint;
+	int sockfd, err, n;
+	char* host;
+	if (argc != 1) {
+		err_quit("usage: ruptimed");
+	}
+	if (n = sysconf(_SC_HOST_NAME_MAX); n < 0) {
+		n = HOST_NAME_MAX;
+	}
+	if (host = malloc(n) == nullptr) {
+		err_sys("malloc error");
+	}
+	if (gethostname(host, n) < 0) {
+		err_sys("gethostname error");
+	}
+	daemonize("ruptimed");
+	memset(&hint, 0, sizeof hint);
+	hint.ai_flags = AI_CANONNAME;
+	hint.ai_socktype = SOCK_STREAM;
+	hint.ai_canonname = nullptr;
+	hint.ai_addr = nullptr;
+	hint.ai_next = nullptr;
+	if (err = getaddrinfo(host, "ruptime", &hint, &ailist); err != 0) {
+		syslog(LOG_ERR, "ruptimed: getaddrinfo error: %s", gai_strerror(err));
+		exit(1);
+	}
+	for (aip = ailist; aip != nullptr; aip = aip->ai_next) {
+		if (sockfd = initserver(SOCK_STREAM, aip->ai_addr, aip->ai_addrlen, QLEN); sockfd >= 0) {
+			serve(sockfd);
+			exit(0);
+		}
+	}
 	return 0;
 }
