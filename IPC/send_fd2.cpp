@@ -50,7 +50,7 @@ int send_fd(int fd, int fd_to_send){
         }
     }
     else{
-        if (cmptr == nullptr && ((cmptr=malloc(CONTROLLEN)) == nullptr)){
+        if (cmptr == nullptr && ((cmptr= static_cast<cmsghdr *>(malloc(CONTROLLEN))) == nullptr)){
             return -1;
         }
         msg.msg_control = cmptr;
