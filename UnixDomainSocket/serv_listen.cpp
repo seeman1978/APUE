@@ -9,7 +9,7 @@
 
 #include "apue.h"
 #include <sys/socket.h>
-#incldue <sys/un.h>
+#include <sys/un.h>
 #include <errno.h>
 
 constexpr auto QLEN = 10;

@@ -29,7 +29,7 @@ int serv_accept(int listenfd, uid_t *uidptr){
     struct stat statbuf;
     char *name;
     ///allocate enough space for longest name plus terminating null
-    if (name=malloc(sizeof(un.sun_path)+1); name == nullptr){
+    if (name= static_cast<char *>(malloc(sizeof(un.sun_path) + 1)); name == nullptr){
         return -1;
     }
     len = sizeof un;
@@ -38,7 +38,7 @@ int serv_accept(int listenfd, uid_t *uidptr){
         return -2;  /// often errno=EINTR, if signal caught
     }
     ///obtain the client's uid from its calling address
-    len -= offsetof(struct sockaddr_un, un.sun_path); /// len of pathname
+    len -= offsetof(struct sockaddr_un, sun_path); /// len of pathname
     memcpy(name, un.sun_path, len);
     name[len] = 0;///null terminate
     if (stat(name, &statbuf) < 0){
@@ -56,11 +56,11 @@ int serv_accept(int listenfd, uid_t *uidptr){
         goto errout;
     }
     staletime = time(nullptr) - STALE;
-    if (statbuf.st_atim < staletime || statbuf.st_ctim < staletime || statbuf.st_mtim < staletime){
+    if (statbuf.st_atim.tv_sec < staletime || statbuf.st_ctim.tv_sec < staletime || statbuf.st_mtim.tv_sec < staletime){
         rval = -6;///i-node is too old
         goto errout;
     }
-    if (uidprt != nullptr){
+    if (uidptr != nullptr){
         *uidptr = statbuf.st_uid;   ///return uid of caller
     }
     unlink(name);
