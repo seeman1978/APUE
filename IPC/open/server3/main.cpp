@@ -29,56 +29,73 @@ static struct pollfd* grow_pollfd(struct pollfd *pfd, int *maxfd){
 }
 
 void loop_poll(){
-    int i, n, maxfd, maxi, listenfd, clifd, nread;
+    int i, listenfd, clifd, nread;
     char buf[MAXLINE];
     uid_t uid;
-    fd_set rset, allset;
-    FD_ZERO(&allset);
+    struct pollfd *pollfd;
+    int numfd = 1, maxfd = NALLOC;
+    if (pollfd = static_cast<struct pollfd *>(malloc(NALLOC * sizeof(struct pollfd))); pollfd == nullptr){
+        err_sys("malloc error");
+    }
+    for (i = 0; i<NALLOC; ++i) {
+        pollfd[i].fd = -1;
+        pollfd[i].events = POLLIN;
+        pollfd[i].revents = 0;
+    }
     ///obtain fd to listen for client requests on
     if (listenfd = serv_listen(CS_OPEN); listenfd < 0){
         log_sys("serv_listen error");
     }
-    FD_SET(listenfd, &allset);
-    maxfd = listenfd;
-    maxi = -1;
+    client_add(listenfd, 0); ///we use [0] for listenfd
+    pollfd[0].fd = listenfd;
+
     for (;;){
-        rset = allset;  /// rset gets modified each time around
-        if (n = select(maxfd+1, &rset, nullptr, nullptr, nullptr); n < 0){
-            log_sys("select error");
+        if (poll(pollfd, numfd, -1) < 0){
+            log_sys("poll error");
         }
-        if (FD_ISSET(listenfd, &rset)){
+
+        if (pollfd[0].revents & POLLIN){
             /// accept new client request
             if (clifd = serv_accept(listenfd, &uid); clifd < 0){
                 log_sys("serv_accept error: %d", clifd);
             }
-            i = client_add(clifd, uid);
-            FD_SET(clifd, &allset);
-            if (clifd > maxfd){
-                maxfd = clifd;  ///max fd for select()
+            client_add(clifd, uid);
+            ///possibly increase the size of the pollfd array
+            if (numfd == maxfd){
+                pollfd = grow_pollfd(pollfd, &maxfd);
             }
-            if (i > maxfd){
-                maxi = i; ///max index in client[] array
-            }
+            pollfd[numfd].fd = clifd;
+            pollfd[numfd].events = POLLIN;
+            pollfd[numfd].revents = 0;
+            numfd++;
             log_msg("new connection : uid %d, fd %d", uid, clifd);
-            continue;
         }
-        for (i = 0; i < maxi; ++i) {
-            if (clifd = client[i].fd; clifd<0){
-                continue;
+        for (i = 1; i < numfd; ++i) {
+            if (pollfd[i].revents & POLLHUP){
+                goto hungup;
             }
-            if (FD_ISSET(clifd, &rset)){
-                ///read argument buffer from client
-                if (nread = read(clifd, buf, MAXLINE); nread<0){
-                    log_sys("read error onj fd %d", clifd);
+            else if (pollfd[i].revents & POLLIN){
+                ///read arguments buffer from client
+                if (nread = read(pollfd[i].fd, buf, MAXLINE); nread < 0){
+                    log_sys("read error on fd %d", pollfd[i].fd);
                 }
                 else if (nread == 0){
-                    log_msg("closed: uid %d, fd %d", client[i].uid, clifd);
-                    client_del(clifd);  /// client has closed cxn
-                    FD_CLR(clifd, &allset);
-                    close(clifd);
+hungup:
+                    ///the client closed the connection
+                    log_msg("closed: uid %d, fd %d", client[i].uid, pollfd[i].fd);
+                    client_del(pollfd[i].fd);
+                    close(pollfd[i].fd);
+                    if (i < (numfd-1)){
+                        ///pack the array
+                        pollfd[i].fd = pollfd[numfd-1].fd;
+                        pollfd[i].events = pollfd[numfd-1].events;
+                        pollfd[i].revents = pollfd[numfd-1].revents;
+                        i--;
+                    }
+                    numfd--;
                 }
-                else{   ///process client's request
-                    handle_request(buf, nread, clifd, client[i].uid);
+                else{///process client's request
+                    handle_request(buf, nread, pollfd[i].fd, client[i].uid);
                 }
             }
         }
